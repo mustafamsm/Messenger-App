@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('message_id')->constrained('messages')->cascadeOnDelete(); // الرسالة
             $table->timestamp('read_at')->nullable(); // وقت قراءة الرسالة
             $table->softDeletes();
+            $table->primary(['user_id','message_id']); // مفتاح مركب للجدول
         });
     }
 
