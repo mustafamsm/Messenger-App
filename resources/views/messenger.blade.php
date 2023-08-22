@@ -878,7 +878,7 @@
                     <div class="d-flex flex-column h-100 position-relative">
                         <div class="hide-scrollbar">
 
-                           <ChatList ></ChatList>
+                           <Chat-list ></Chat-list>
 
                         </div>
                     </div>
@@ -2216,7 +2216,7 @@
 
         <!-- Chat -->
 
-        <Messenger ></Messenger>
+        <messenger  :conversation="conversation" />
         {{-- <main class="main is-visible" data-dropzone-area="">
             <div class="container h-100">
 
@@ -4048,12 +4048,13 @@
     <script src="{{asset('js/manifest.js')}}"></script>
     <script src="{{asset('js/vendor.js')}}"></script>
 
-    <script src="{{asset('js/messages.js')}}"></script>
+ 
     <script>
         const userId="{{Auth::id()}}";
         const csrf_token='{{csrf_token()}}';
 
         </script>
+           <script src="{{asset('js/messages.js')}}"></script>
         {{-- <script>
         // Enable pusher logging - don't include this in production
         Pusher.logToConsole = true;

@@ -52,7 +52,7 @@ class User extends Authenticatable
        ->latest('last_message_id')
        ->withPivot([
               'role','joined_at'
-         
+
        ]);
     }
     //messages that the user sent

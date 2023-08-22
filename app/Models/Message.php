@@ -11,6 +11,10 @@ class Message extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['conversation_id', 'user_id', 'body', 'type'];
+    protected $casts=[
+        'body'=>'json'
+    ];
+
 
     //the users who have recipt the message
     //many to many relationship

@@ -24,9 +24,26 @@ class MessagesControlle extends Controller
                 }
             ])
             ->findOrFail($id);
+        $messages = $conversations->messages()
+            ->with('user')
+            ->where(function ($query) use ($user) {
+                $query
+                    ->where(function ($query) use ($user) {
+                        $query->where('user_id', $user->id)
+                            ->whereNull('deleted_at');
+                    })
+                    ->orWhereRaw('id IN (
+                        SELECT message_id FROM recipients
+                        WHERE recipients.message_id = messages.id
+                        AND recipients.user_id = ?
+                        AND recipients.deleted_at IS NULL
+                    )', [$user->id]);
+            })
+            ->latest()
+            ->paginate();
         return [
             'conversation' => $conversations,
-            'messages' => $conversations->messages()->with('user')->paginate()
+            'messages' => $messages
         ];
     }
 
@@ -34,7 +51,12 @@ class MessagesControlle extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => [
+                Rule::requiredIf(function () use ($request) {
+                    return !$request->hasFile('attachment');
+                }),
+           ],
+            'attachment' => 'file',
             'conversation_id' => [
                 Rule::requiredIf(function () use ($request) {
                     return !$request->has('user_id');
@@ -51,6 +73,8 @@ class MessagesControlle extends Controller
             ]
         ]);
         $user = Auth::user();
+//        $user = User::find(1);
+
 
         $conversations_id = $request->post('conversation_id');
         $user_id = $request->post('user_id');
@@ -64,7 +88,7 @@ class MessagesControlle extends Controller
             } else {
 
 
-                //if the converstion is peer 
+                //if the converstion is peer
                 $conversation = Conversation::where('type', '=', 'peer')
                     ->whereHas('participants', function ($builder) use ($user_id, $user) {
                         $builder->join('participants as p', 'p.conversation_id', '=', 'participants.conversation_id')
@@ -83,19 +107,38 @@ class MessagesControlle extends Controller
                     $user_id => ['joined_at' => now()] //reciver
                 ]);
             }
+            //if the message is text
+            $type = 'text';
+            $message=$request->post('message');
 
+            //if the message has attachment
+            if ($request->hasFile('attachment')) {
+                $file = $request->file('attachment');
+                $message = [
+                    'file_name'=>$file->getClientOriginalName(),
+                    'file_size'=>$file->getSize(),
+                    'mimetype'=>$file->getMimeType(),
+                    'file_path'=>$file->store('attachments', ['disk' => 'public']),
+                ];
+
+                 $type = 'attachment';
+
+            }
+            //create the message
             $message = $conversation->messages()->create([
                 'user_id' => $user->id,
-                'body' => $request->post('message'),
+                'type' => $type,
+                'body' => $message,
             ]);
 
             //for every user in the conversation, create a recipient
             DB::statement(
                 '
-        INSERT INTO recipients (user_id, message_id) 
+        INSERT INTO recipients (user_id, message_id)
         SELECT user_id, ? FROM participants WHERE conversation_id = ?
+        AND user_id <> ?
         ',
-                [$message->id, $conversation->id]
+                [$message->id, $conversation->id, $user->id]
             );
 
             $conversation->update([
@@ -113,15 +156,10 @@ class MessagesControlle extends Controller
     }
 
 
-
-
-
-
     public function update(Request $request, $id)
     {
         //
     }
-
 
 
     public function destroy($id)

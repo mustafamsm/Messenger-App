@@ -22,13 +22,13 @@
                         <div class="row align-items-center gx-5">
                             <div class="col-auto">
                                 <div class="avatar avatar-online d-none d-xl-inline-block">
-                                    <img class="avatar-img" id="chat-avatar" src="" alt="">
+                                    <img class="avatar-img" id="chat-avatar" :src="conversation.participants[0].avatar_url" alt="">
                                 </div>
                             </div>
 
                             <div class="col overflow-hidden">
-                                <h5 class="text-truncate" id="chat-name"></h5>
-                                <p class="text-truncate d-none">is typing<span
+                                <h5 class="text-truncate" id="chat-name">{{  conversation.participants[0].name}}</h5>
+                                <p v-show="conversation.participants[0].isTyping" class="text-truncate "  >is typing<span
                                         class='typing-dots'><span>.</span><span>.</span><span>.</span></span>
                                 </p>
                             </div>
@@ -95,7 +95,7 @@
 </template>
 <script>
 export default{
-    
+    props:['conversation'],
 }
 
 </script>

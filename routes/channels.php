@@ -18,8 +18,12 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('Messenger.{id}',function ($user,$id){
-    
+
     if($user->id==$id){
         return $user;
     }
+});
+
+Broadcast::channel('Chat',function($user){
+   return $user;
 });

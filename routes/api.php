@@ -25,9 +25,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('conversations/{conversation}',[ConversationController::class,'show']);
     Route::post('conversations/{conversation}/participants',[ConversationController::class,'addParticipant']);
     Route::delete('conversations/{conversation}/participants',[ConversationController::class,'removeParticipant']);
-   
+    Route::put('conversations/{conversation}/read',[ConversationController::class,'markAsRead']);
     Route::get('conversations/{id}/messages',[MessagesControlle::class,'index']);
     Route::post('messages',[MessagesControlle::class,'store'])->name('api.messages.store');
-    Route::delete('messages/{id}',[ConversationController::class,'destroy']);
+    Route::delete('messages/{id}',[MessagesControlle::class,'destroy']);
 
 });

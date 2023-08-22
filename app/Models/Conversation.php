@@ -29,7 +29,7 @@ class Conversation extends Model
     public function messages()
     {
         return $this->hasMany(Message::class, 'conversation_id', 'id');
-         
+
     }
 
     //the user who created the conversation
@@ -44,6 +44,17 @@ class Conversation extends Model
     {
         return $this->belongsTo(Message::class, 'last_message_id', 'id')
         ->withDefault();
-             
+
+    }
+    public function recipients()
+    {
+        return $this->hasManyThrough(
+            Recipient::class,
+            Message::class,
+            'conversation_id',
+            'message_id',
+            'id',
+            'id'
+        );
     }
 }
